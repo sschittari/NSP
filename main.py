@@ -1,6 +1,6 @@
 from feature_importance import get_xgboost_top_features
 from preprocessing import get_topfeatures_train_test, generate_train_sampled_csv, generate_test_sampled_csv, csv_to_xy
-from networks import train_DNN, train_CNN, train_CNN_LSTM
+from models import train_DNN, train_CNN, train_CNN_LSTM
 
 # top_features = get_xgboost_top_features() # the xgboost.fit hangs... don't know why
 top_features = ['sttl', 'ct_dst_sport_ltm', 'dttl', 'is_sm_ips_ports', 'ct_srv_dst', 'dmean',
