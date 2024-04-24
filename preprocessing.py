@@ -64,4 +64,6 @@ def csv_to_xy(file):
     X = data[:, :20]  # Select first 20 columns for X
     y = data[:, 20:]  # Select remaining columns for Y
 
+    print("Parsed file " + file + " and returned X shape: " + str(X.shape) + ", y shape:", str(y.shape))
+
     return X, y
