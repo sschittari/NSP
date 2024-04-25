@@ -1,9 +1,10 @@
 import keras
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Dropout, Flatten, MaxPooling1D, Conv1D, LSTM, BatchNormalization
 from tensorflow.keras.optimizers import Adam
 import matplotlib.pyplot as plt
 from preprocessing import csv_to_xy
+
 
 def train_DNN(train_file, test_file):
 
@@ -29,6 +30,9 @@ def train_DNN(train_file, test_file):
     print("Training DNN...")
     hist = dnn.fit(X_train, y_train, epochs=60, validation_split=0.2)
 
+    # save model
+    dnn.save('saved_models/dnn.keras')
+    
     log_file = f'logs/DNN_{X_train.shape[0]}_result.txt'
     # write training results to log file
     with open(log_file, 'w') as file:
@@ -40,6 +44,7 @@ def train_DNN(train_file, test_file):
         file.write(f"DNN Test acc: {dnn.evaluate(X_test, y_test, batch_size=128)[1]}")
 
     plot_file = f'plots/DNN_{X_train.shape[0]}_training.png'
+    plt.clf()
     plt.plot(hist.history['accuracy'], label='trn_accuracy')
     plt.plot(hist.history['val_accuracy'], label = 'val_accuracy')
     plt.xlabel('Epoch')
@@ -72,6 +77,9 @@ def train_CNN(train_file, test_file):
     print("Training CNN...")
     hist = cnn.fit(X_train, y_train, epochs=60, batch_size=32, validation_split=0.2)
 
+    # save model
+    cnn.save('saved_models/cnn.keras')
+
     log_file = f'logs/CNN_{X_train.shape[0]}_result.txt'
     # write training results to log file
     with open(log_file, 'w') as file:
@@ -83,6 +91,7 @@ def train_CNN(train_file, test_file):
         file.write(f"CNN Test acc: {cnn.evaluate(X_test, y_test, batch_size=128)[1]}")
 
     plot_file = f'plots/CNN_{X_train.shape[0]}_training.png'
+    plt.clf()
     plt.plot(hist.history['accuracy'], label='trn_accuracy')
     plt.plot(hist.history['val_accuracy'], label = 'val_accuracy')
     plt.xlabel('Epoch')
@@ -115,6 +124,9 @@ def train_CNN_LSTM(train_file, test_file):
     print("Training CNN-LSTM...")
     hist = cnnlstm.fit(X_train, y_train, epochs=60, batch_size=32, validation_split=0.2)
 
+    # save model
+    cnnlstm.save('saved_models/cnnlstm.keras')
+
     log_file = f'logs/CNN-LSTM_{X_train.shape[0]}_result.txt'
     # write training results to log file
     with open(log_file, 'w') as file:
@@ -126,6 +138,7 @@ def train_CNN_LSTM(train_file, test_file):
         file.write(f"CNN-LSTM Test acc: {cnnlstm.evaluate(X_test, y_test, batch_size=128)[1]}")
 
     plot_file = f'plots/CNN-LSTM_{X_train.shape[0]}_training.png'
+    plt.clf()
     plt.plot(hist.history['accuracy'], label='trn_accuracy')
     plt.plot(hist.history['val_accuracy'], label = 'val_accuracy')
     plt.xlabel('Epoch')
@@ -136,3 +149,11 @@ def train_CNN_LSTM(train_file, test_file):
     plt.savefig(plot_file)
 
     print(f"CNN-LSTM log saved to {log_file} and plot saved to {plot_file}\n")
+
+def evaluate_saved_model(model_path, test_file):
+
+    X_test, y_test = csv_to_xy(test_file)
+
+    model = load_model(model_path)
+
+    return model.evaluate(X_test, y_test, batch_size=128)[1]
