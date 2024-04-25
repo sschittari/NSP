@@ -1,6 +1,6 @@
 from feature_importance import get_xgboost_top_features
-from preprocessing import get_topfeatures_train_test, generate_train_sampled_csv, generate_test_sampled_csv, csv_to_xy
-from models import train_DNN, train_CNN, train_CNN_LSTM, evaluate_saved_model
+from preprocessing import get_topfeatures_train_test, generate_train_sampled_csv, generate_test_sampled_csv
+import models
 
 # top_features = get_xgboost_top_features() # the xgboost.fit hangs... don't know why
 top_features = ['sttl', 'ct_dst_sport_ltm', 'dttl', 'is_sm_ips_ports', 'ct_srv_dst', 'dmean',
@@ -25,9 +25,9 @@ if GENERATE_SAMPLES:
 train_10000 = 'datasets/train_10000.csv'
 test_40000 = 'datasets/test_40000.csv'
 
-train_DNN(train_10000, test_40000)
-train_CNN(train_10000, test_40000)
-train_CNN_LSTM(train_10000, test_40000)
+# models.train_DNN(train_10000, test_40000)
+models.train_CNN(train_10000, test_40000)
+models.train_CNN_LSTM(train_10000, test_40000)
 
-print(evaluate_saved_model('saved_models/cnn.keras', test_40000))
+# print(evaluate_saved_model('saved_models/cnn.keras', test_40000))
 
