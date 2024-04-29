@@ -9,15 +9,21 @@ from preprocessing import csv_to_xy
 def create_DNN(X_train, y_train):
     print("Compiling DNN...")
     dnn = Sequential()
-    dnn.add(Dense(128, activation='relu', input_shape=(X_train.shape[1],)))
+    dnn.add(Dense(256, activation='relu', input_shape=(X_train.shape[1],)))
     dnn.add(BatchNormalization())
-    dnn.add(Dropout(0.2))
+    # dnn.add(Dropout(0.2))
+    dnn.add(Dense(256, activation='relu'))
+    dnn.add(BatchNormalization())
+    # dnn.add(Dropout(0.2))
+    dnn.add(Dense(256, activation='relu'))
+    dnn.add(BatchNormalization())
+    # dnn.add(Dropout(0.2))
+    dnn.add(Dense(128, activation='relu'))
+    dnn.add(BatchNormalization())
+    # dnn.add(Dropout(0.2))
     dnn.add(Dense(64, activation='relu'))
     dnn.add(BatchNormalization())
-    dnn.add(Dropout(0.2))
-    dnn.add(Dense(32, activation='relu'))
-    dnn.add(BatchNormalization())
-    dnn.add(Dropout(0.2))
+    # dnn.add(Dropout(0.2))
     dnn.add(Dense(y_train.shape[1], activation='softmax'))
     dnn.summary()
 
@@ -75,14 +81,32 @@ def train_DNN(train_file, test_file, instances=5, epochs=60):
 
 def create_CNN(X_train, y_train):
     print("Compiling CNN...")
-    cnn = Sequential()
-    cnn.add(Conv1D(128, kernel_size=3, activation='relu', input_shape=(X_train.shape[1],1,)))
-    cnn.add(MaxPooling1D((2), padding="same"))
-    cnn.add(Conv1D(64, kernel_size=3, activation='relu'))
-    cnn.add(MaxPooling1D((2)))
-    cnn.add(Flatten())
-    cnn.add(Dense(units=32, activation='relu'))
-    cnn.add(Dense(y_train.shape[1], activation='softmax'))
+    cnn = Sequential([
+
+        Conv1D(filters=96, kernel_size=11, strides=4, activation='relu', input_shape=(X_train.shape[1],1,)),
+        MaxPooling1D(pool_size=3, strides=2),
+        
+        Conv1D(filters=256, kernel_size=5, padding='same', activation='relu'),
+        MaxPooling1D(pool_size=3, strides=2),
+        
+        Conv1D(filters=384, kernel_size=3, padding='same', activation='relu'),
+        
+        Conv1D(filters=384, kernel_size=3, padding='same', activation='relu'),
+        
+        Conv1D(filters=256, kernel_size=3, padding='same', activation='relu'),
+        MaxPooling1D(pool_size=3, strides=2),
+        
+        Flatten(),
+        
+        Dense(units=4096, activation='relu'),
+        Dropout(0.5),
+        
+        Dense(units=4096, activation='relu'),
+        Dropout(0.5),
+        
+        Dense(y_train.shape[1], activation='softmax')
+    ])
+
     cnn.summary()
 
     cnn.compile(optimizer=Adam(learning_rate=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])

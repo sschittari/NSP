@@ -22,12 +22,18 @@ if GENERATE_SAMPLES:
     # generate sampled test file with constant size
     generate_test_sampled_csv(X_test, y_test, 40000, 0)
 
+train_1000 = 'datasets/train_1000.csv'
 train_10000 = 'datasets/train_10000.csv'
+train_20000 = 'datasets/train_20000.csv'
 test_40000 = 'datasets/test_40000.csv'
+
+# models.train_DNN(train_1000, test_40000)
+
+# models.train_DNN(train_20000, test_40000)
 
 # models.train_DNN(train_10000, test_40000)
 models.train_CNN(train_10000, test_40000)
-models.train_CNN_LSTM(train_10000, test_40000)
+# models.train_CNN_LSTM(train_10000, test_40000)
 
 # print(evaluate_saved_model('saved_models/cnn.keras', test_40000))
 
