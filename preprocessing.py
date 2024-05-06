@@ -24,49 +24,6 @@ def get_topfeatures_train_test(xgboost_top_features):
     return X_train, y_train, X_test, y_test
 
 
-def generate_train_sampled_csv(X_train, y_train, train_size, seed):
-
-    random.seed(seed)
-    train_random_idx = random.sample(range(X_train.shape[0]), train_size)
-    X_train_subset = X_train[train_random_idx]
-    y_train_subset = y_train[train_random_idx]
-
-    print("Generating samples for train size: " + str(train_size))
-    print("X train shape: " + str(X_train_subset.shape) + ", y train shape:", str(y_train_subset.shape))
-
-    # write to csv files
-    train_subset = np.concatenate((X_train_subset, y_train_subset), axis=1)
-    path = f'datasets/train_{train_size}.csv'
-    with open(path, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(train_subset)
-    
-    return path
-
-
-def generate_subset_test_csv(X_test, y_test, test_size, seed):
-
-    # random.seed(seed)
-    # test_random_idx = random.sample(range(X_test.shape[0]), test_size)
-    # X_test_subset = X_test[test_random_idx]
-    # y_test_subset = y_test[test_random_idx]
-
-    # get the first n samples from test data
-    X_test_subset = X_test[:test_size]
-    y_test_subset = y_test[:test_size]
-
-    print("Generating samples for test size: " + str(test_size))
-    print("X test shape: " + str(X_test_subset.shape) + ", y test shape:", str(y_test_subset.shape))
-
-    # write to csv files
-    test_subset = np.concatenate((X_test_subset, y_test_subset), axis=1)
-    path = f'datasets/test_{test_size}.csv'
-    with open(path, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerows(test_subset)
-
-    return path
-
 def csv_to_xy(file):
     data = np.genfromtxt(file, delimiter=',')
 
