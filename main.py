@@ -1,6 +1,9 @@
 from feature_importance import get_xgboost_top_features
 import preprocessing
 import models
+import pandas as pd
+import numpy as np
+import sklearn
 
 GENERATE_TOP_FEATURES = False
 GENERATE_SAMPLES = False
@@ -15,9 +18,24 @@ else:
 
 
 if GENERATE_SAMPLES:
-    # TODO: PREPROCESSING CODE HERE TO GET train_final.csv and test_final.csv
-    #
-    #
+    train = pd.read_csv("/dataset/UNSW_NB15_training-set.csv")
+    test = pd.read_csv("/dataset/UNSW_NB15_testing-set.csv")
+
+    enc_y = OneHotEncoder(handle_unknown='ignore')
+    y_trn = enc_y.fit_transform(np.array(train['attack_cat']).reshape(-1, 1)).toarray()
+
+    x_trn = train.filter(top_features)
+
+    scaler = StandardScaler()
+    x_trn = scaler.fit_transform(np.array(x_trn))
+
+    x_trn, x_val, y_trn, y_val = train_test_split(x_trn, y_trn, train_size=0.8)
+
+    y_test = enc_y.fit_transform(np.array(test['attack_cat']).reshape(-1, 1)).toarray()
+    x_test = test.filter(top_features)
+    x_test = scaler.transform(np.array(x_test))
+    
+    
 else: 
     train_file = 'datasets/train_final.csv'
     test_file = 'datasets/test_final.csv'
