@@ -8,23 +8,24 @@ from preprocessing import csv_to_xy
 
 def create_DNN(X_train, y_train):
     print("Compiling DNN...")
-    dnn = Sequential()
-    dnn.add(Dense(256, activation='relu', input_shape=(X_train.shape[1],)))
-    dnn.add(BatchNormalization())
-    # dnn.add(Dropout(0.2))
-    dnn.add(Dense(256, activation='relu'))
-    dnn.add(BatchNormalization())
-    # dnn.add(Dropout(0.2))
-    dnn.add(Dense(256, activation='relu'))
-    dnn.add(BatchNormalization())
-    # dnn.add(Dropout(0.2))
-    dnn.add(Dense(128, activation='relu'))
-    dnn.add(BatchNormalization())
-    # dnn.add(Dropout(0.2))
-    dnn.add(Dense(64, activation='relu'))
-    dnn.add(BatchNormalization())
-    # dnn.add(Dropout(0.2))
-    dnn.add(Dense(y_train.shape[1], activation='softmax'))
+    dnn = Sequential([
+        Dense(256, activation='relu', input_shape=(X_train.shape[1],)),
+        BatchNormalization(),
+        Dropout(0.4),
+        Dense(256, activation='relu'),
+        BatchNormalization(),
+        Dropout(0.4),
+        Dense(256, activation='relu'),
+        BatchNormalization(),
+        Dropout(0.4),
+        Dense(256, activation='relu'),
+        BatchNormalization(),
+        Dropout(0.4),
+        Dense(64, activation='relu'),
+        BatchNormalization(),
+        Dropout(0.4),
+        Dense(y_train.shape[1], activation='softmax')
+    ])
     dnn.summary()
 
     dnn.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
@@ -47,6 +48,7 @@ def train_DNN(train_file, test_file, instances=5, epochs=60):
         print(f"Training DNN {i}...\n")
         hist = dnn.fit(X_train, y_train, epochs=epochs, validation_split=0.2)
         test_acc = dnn.evaluate(X_test, y_test, batch_size=128)[1]
+        print(f'DNN {i}: test accuracy {test_acc}')
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             best_hist = hist
@@ -77,39 +79,41 @@ def train_DNN(train_file, test_file, instances=5, epochs=60):
     plt.savefig(plot_file)
 
     print(f"DNN log saved to {log_file} and plot saved to {plot_file}\n")
+    print(f"DNN best test accuracy {best_test_acc}\n")
+
 
 
 def create_CNN(X_train, y_train):
     print("Compiling CNN...")
     cnn = Sequential([
 
-        Conv1D(filters=96, kernel_size=11, strides=4, activation='relu', input_shape=(X_train.shape[1],1,)),
-        MaxPooling1D(pool_size=3, strides=2),
-        
-        Conv1D(filters=256, kernel_size=5, padding='same', activation='relu'),
-        MaxPooling1D(pool_size=3, strides=2),
-        
-        Conv1D(filters=384, kernel_size=3, padding='same', activation='relu'),
-        
-        Conv1D(filters=384, kernel_size=3, padding='same', activation='relu'),
-        
-        Conv1D(filters=256, kernel_size=3, padding='same', activation='relu'),
-        MaxPooling1D(pool_size=3, strides=2),
-        
+        Conv1D(96, kernel_size=11, activation='relu', input_shape=(X_train.shape[1],1,)),
+        MaxPooling1D(pool_size=3, strides=2, padding='same'),
+        Conv1D(256, kernel_size=5, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        MaxPooling1D(pool_size=3, strides=2, padding='same'),
+        Conv1D(384, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        Conv1D(384, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        Conv1D(256, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        MaxPooling1D(pool_size=3, strides=2, padding='same'),
         Flatten(),
-        
-        Dense(units=4096, activation='relu'),
+        Dense(1028, activation='relu'),
         Dropout(0.5),
-        
-        Dense(units=4096, activation='relu'),
+        Dense(1028, activation='relu'),
         Dropout(0.5),
-        
         Dense(y_train.shape[1], activation='softmax')
     ])
 
     cnn.summary()
 
-    cnn.compile(optimizer=Adam(learning_rate=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])
+    cnn.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
     return cnn
 
@@ -129,13 +133,13 @@ def train_CNN(train_file, test_file, instances=5, epochs=60):
         print(f"Training CNN {i}...\n")
         hist = cnn.fit(X_train, y_train, epochs=epochs, validation_split=0.2)
         test_acc = cnn.evaluate(X_test, y_test, batch_size=128)[1]
+        print(f'CNN {i}: test accuracy {test_acc}')
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             best_hist = hist
             best_cnn = cnn
-
-    # save model
-    best_cnn.save(f'saved_models/cnn_{X_train.shape[0]}.keras')
+            # save model
+            best_cnn.save(f'saved_models/cnn_{X_train.shape[0]}.keras')
 
     log_file = f'logs/CNN_{X_train.shape[0]}_result.txt'
     # write training results to log file
@@ -159,21 +163,40 @@ def train_CNN(train_file, test_file, instances=5, epochs=60):
     plt.savefig(plot_file)
 
     print(f"CNN log saved to {log_file} and plot saved to {plot_file}\n")
+    print(f"CNN best test accuracy {best_test_acc}\n")
 
 
 def create_CNN_LSTM(X_train, y_train):
     print("Compiling CNN-LSTM...")
-    cnnlstm = Sequential()
-    cnnlstm.add(Conv1D(128, kernel_size=3, activation='relu', input_shape=(X_train.shape[1],1,)))
-    cnnlstm.add(MaxPooling1D((2), padding="same"))
-    cnnlstm.add(Conv1D(64, kernel_size=3, activation='relu'))
-    cnnlstm.add(MaxPooling1D((2)))
-    cnnlstm.add(LSTM(80))
-    cnnlstm.add(Dense(units=64, activation='relu'))
-    cnnlstm.add(Dense(y_train.shape[1], activation='softmax'))
+
+    cnnlstm = Sequential([
+        Conv1D(96, kernel_size=11, activation='relu', input_shape=(X_train.shape[1],1,)),
+        MaxPooling1D(pool_size=3, strides=2, padding='same'),
+        Conv1D(256, kernel_size=5, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        MaxPooling1D(pool_size=3, strides=2, padding='same'),
+        Conv1D(384, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        Conv1D(384, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        Conv1D(256, kernel_size=3, padding='same', activation='relu'),
+        BatchNormalization(),
+        Dropout(0.5),
+        MaxPooling1D(pool_size=3, strides=2, padding='same'),
+        # Flatten(),
+        LSTM(units=128, ),
+        # LSTM(units=128),
+        Dense(256, activation='relu'),
+        Dropout(0.5),
+        Dense(y_train.shape[1], activation='softmax')
+    ])
+
     cnnlstm.summary()
 
-    cnnlstm.compile(optimizer=Adam(learning_rate=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])
+    cnnlstm.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
 
     return cnnlstm
 
@@ -193,6 +216,7 @@ def train_CNN_LSTM(train_file, test_file, instances=5, epochs=60):
         print(f"Training CNN-LSTM {i}...\n")
         hist = cnnlstm.fit(X_train, y_train, epochs=epochs, validation_split=0.2)
         test_acc = cnnlstm.evaluate(X_test, y_test, batch_size=128)[1]
+        print(f'CNN-LSTM {i}: test accuracy {test_acc}')
         if test_acc > best_test_acc:
             best_test_acc = test_acc
             best_hist = hist

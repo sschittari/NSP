@@ -36,27 +36,36 @@ def generate_train_sampled_csv(X_train, y_train, train_size, seed):
 
     # write to csv files
     train_subset = np.concatenate((X_train_subset, y_train_subset), axis=1)
-    with open(f'datasets/train_{train_size}.csv', 'w', newline='') as csvfile:
+    path = f'datasets/train_{train_size}.csv'
+    with open(path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(train_subset)
+    
+    return path
 
 
-def generate_test_sampled_csv(X_test, y_test, test_size, seed):
+def generate_subset_test_csv(X_test, y_test, test_size, seed):
 
-    random.seed(seed)
-    test_random_idx = random.sample(range(X_test.shape[0]), test_size)
-    X_test_subset = X_test[test_random_idx]
-    y_test_subset = y_test[test_random_idx]
+    # random.seed(seed)
+    # test_random_idx = random.sample(range(X_test.shape[0]), test_size)
+    # X_test_subset = X_test[test_random_idx]
+    # y_test_subset = y_test[test_random_idx]
+
+    # get the first n samples from test data
+    X_test_subset = X_test[:test_size]
+    y_test_subset = y_test[:test_size]
 
     print("Generating samples for test size: " + str(test_size))
     print("X test shape: " + str(X_test_subset.shape) + ", y test shape:", str(y_test_subset.shape))
 
     # write to csv files
     test_subset = np.concatenate((X_test_subset, y_test_subset), axis=1)
-    with open(f'datasets/test_{test_size}.csv', 'w', newline='') as csvfile:
+    path = f'datasets/test_{test_size}.csv'
+    with open(path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(test_subset)
 
+    return path
 
 def csv_to_xy(file):
     data = np.genfromtxt(file, delimiter=',')
